@@ -1,0 +1,1 @@
+*/1 * * * * /home/ec2-user/dibs-csg-emailer/emailer.sh >/dev/null

@@ -1,0 +1,23 @@
+{
+  "name": "dibs-csg-emailer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "emailer.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cheryly279/dibs-csg-emailer.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cheryly279/dibs-csg-emailer/issues"
+  },
+  "homepage": "https://github.com/cheryly279/dibs-csg-emailer#readme",
+  "dependencies": {
+    "aws-sdk": "^2.7.15",
+    "isomorphic-fetch": "^2.2.1"
+  }
+}
