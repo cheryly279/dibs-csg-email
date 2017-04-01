@@ -1,20 +1,16 @@
-// load aws sdk
-var aws = require('aws-sdk');
+'use strict';
 var isomorphicFetch = require('isomorphic-fetch');
+var nodemailer = require('nodemailer');
 
-// load aws config
-aws.config.loadFromPath('/home/ec2-user/dibs-csg-emailer/config.json');
+var transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'front.end.digest@gmail.com',
+        pass: 'xxx'
+    }
+});
 
-// load AWS SES
-var ses = new aws.SES({apiVersion: '2010-12-01'});
-
-// send to list
-var to = ['cheryl@1stdibs.com'];
-
-// this must relate to a verified SES account
-var from = 'front.end.digest@gmail.com';
-
-isomorphicFetch('http://ec2-54-144-194-47.compute-1.amazonaws.com:8081/topics/pending')
+fetch('http://localhost:8081/topics/pending')
     .then(function(response) {
         if (response.status >= 400) {
             throw new Error("Bad response from server");
@@ -22,37 +18,35 @@ isomorphicFetch('http://ec2-54-144-194-47.compute-1.amazonaws.com:8081/topics/pe
         return response.json();
     })
     .then(function(topics) {
-        var bodyText = '';
+        var topicMarkup = '';
 
         for(var i = 0; i < topics.length; i++) {
             var currTopic = topics[i];
-            var buffer = new Buffer( currTopic.description || '');
+            var buffer = new Buffer(currTopic.description || '');
             var bufferConverted = buffer.toString('utf8');
-            bodyText += "Topic: " + currTopic.name + "\r\nDescription: " + (bufferConverted) + "\r\nUrl: " + currTopic.url + "\r\n\r\n";
+            var urlMarkup = currTopic.url ? '<div>url: <a href=' + currTopic.url + '>' + currTopic.url + '</a></div>' : '';
+            topicMarkup += "<div>" +
+                "<div><strong>" + currTopic.name + "</strong>: " + bufferConverted + "</div>" + urlMarkup +
+                "<br /></div>";
         }
 
+        var bodyMarkup = "<div>" +
+            "<div>Current Topics:</div><br />" + topicMarkup + "</div>";
+
         // this sends the email
-        ses.sendEmail({
-            Source: from,
-            Destination: { ToAddresses: to },
-            Message : {
-                Subject: {
-                    Data: '1stDibs Front-End Email Digest'
-                },
-                Body: {
-                    Text: {
-                        Data: bodyText,
-                    }
-                }
-            }
+        transporter.sendMail({
+            from: 'front.end.digest@gmail.com',
+            to: 'cheryl@1stdibs.com',
+            subject: '1stDibs Front-End Email Digest',
+            html: bodyMarkup
         }, function(err, data) {
             if (err) {
                 throw err;
             }
 
-            // make items as no longer pending
+            // mark items as no longer pending
             var today = new Date();
-            fetch('http://ec2-54-144-194-47.compute-1.amazonaws.com:8081/topics/sent', {
+            fetch('http://localhost:8081/topics/sent', {
                 method: 'PUT',
                 body: JSON.stringify({
                     sentDate: today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate(),

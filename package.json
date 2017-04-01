@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/cheryly279/dibs-csg-emailer#readme",
   "dependencies": {
-    "aws-sdk": "^2.7.15",
-    "isomorphic-fetch": "^2.2.1"
+    "isomorphic-fetch": "^2.2.1",
+    "nodemailer": "^3.1.8"
   }
 }
